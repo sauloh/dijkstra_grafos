@@ -1,4 +1,4 @@
-N= 1400   Tipo=2 (coordenadas XY)
+N=1400   Tipo=2 (coordenadas XY)
    2104.61   1968.35
    2104.61    232.26
     295.59   1968.35
