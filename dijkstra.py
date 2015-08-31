@@ -26,19 +26,49 @@ class Vertice:
         self.id = no # Identificador do no
         self.adjacente = {} # Inicializa dicionario de adjacencias como vazio
         self.distancia = self.INF # Inicializa distancia do vertice como infinito
+        self.visitado = False # Marca como NaoVisitado
+        self.anterior = None # No anterior
 
+    # Retorna ID do no
+    def get_id(self):
+        return self.id
+
+    # Adiciona no vizinho e distancia entre os nos
     def add_vizinho(self, vizinho, valor=0):
         self.adjacente[vizinho] = valor
 
+    # Retorna lista de nos vizinhos
     def get_conexoes(self):
         return self.adjacente.keys()
-
-    def get_id(self):
-        return self.id
     
+    # Retorna valor entre um no e seu vizinhos v
     def get_valor(self, vizinho):
         return self.adjacente[vizinho]
         
+    # Retorna distancia do No
+    def get_dist(self):
+        return self.distancia
+
+    # Define distancia do no
+    def set_dist(self, valor):
+        self.distancia = valor
+    
+    # Define no anterior
+    def set_anterior(self, ant): 
+        self.anterior = ant
+    
+    # Marca no como visitado
+    def set_visitado(self):
+        self.visitado = True
+
+    def __lt__(self, v):
+        return self.distancia < v.distancia
+        
+
+    # Retorno legivel do tipo 'vetice'. Nome_do_Vertice Adjacentes: Lista_de_Vertices_Adjacentes
+    def __str__(self):
+        return str(self.id) + ' Adjacentes: ' + str([x.id for x in self.adjacente])
+
 class Grafo:
     def __init__(self, tipo):
         self.dic_vertices = {} # Dicionario de Vertices
@@ -80,6 +110,12 @@ class Grafo:
     def get_todos_vertices(self):
         return self.dic_vertices.keys() # Retorna as chaves do dicionario(os nos)
 
+    def set_anterior(self, atual):
+        self.anterior = atual
+   
+    def get_anterior(self, atual):
+        return self.anterior
+
     def matriz_adjacencia(self):
         vertices = self.dic_vertices
         
@@ -91,13 +127,46 @@ class Grafo:
                     print('X', end=" ")
             print("")
 
-    # Imprime Conexoes do Grafo
-    def imprime_conexoes(self):
+    # Retorna Conexoes do Grafo
+    def retorna_conexoes(self):
+        conexoes = []
         for v in g:
             for w in v.get_conexoes():
                 vid = v.get_id()
                 wid = w.get_id()
-                print( "%s, %s, %3d" % (vid, wid, v.get_valor(w)))
+                conexoes.append( "%s, %s, %3d" % (vid, wid, v.get_dist(w)))
+        return conexoes    
+
+# Dijkstra
+def dijkstra(grafo, inicio, fim):
+    import heapq # Impor para trabalhar com filas
+
+    inicio.set_dist(0) # Define distancia do no inicial como 0. Pois a distancia dele para ele mesmo eh 0
+    nao_visitados = [(v.get_dist(), v) for v in grafo] # Gera lista de nos nao visitados
+    #print(nao_visitados)
+    heapq.heapify(nao_visitados) # Coloca a lista em forma de fila
+
+    while len(nao_visitados): # Enquanto existem nos nao visitados 
+        nv = heapq.heappop(nao_visitados) # Retira da lista de nao visitado vertice com menor distancia
+        atual = nv[1] 
+        atual.set_visitado()
+         
+        for proximo in atual.adjacente:
+            if proximo.visitado: # Se no ja foi visitado, nao faz nada
+                continue 
+            nova_dist = atual.get_dist() + atual.get_valor(proximo) # No nao visitado, calcula nova distancia
+            
+            # Relaxa distancia
+            if nova_dist < proximo.get_dist():
+                proximo.set_dist(nova_dist)
+                proximo.set_anterior(atual)
+        
+        # Atualiza fila
+        while len(nao_visitados):
+            heapq.heappop(nao_visitados)
+        nao_visitados = [(v.get_dist(), v) for v in grafo if not v.visitado] # Gera lista de nos nao visitados
+        heapq.heapify(nao_visitados) # Coloca a lista em forma de fila
+    
 
 #### Programa Principal ####
 
@@ -124,10 +193,16 @@ conteudo_arquivo.pop(0)
 if tipo == 1:
     g = leTipo1(conteudo_arquivo) # Passa conteudo do arquivo e tamanho da matriz e recebe como retorno o novo grafo
 
-    # Descomente a linha seguinte para imprimir as conexoes do Grafo
-    #g.imprime_conexoes() 
-
+    # Descomente as 3 linhas seguintes para imprimir as conexoes do Grafo
+    #conexoes = g.retorna_conexoes() 
+    #for con in conexoes:
+    #    print(con)
+    
     # Descomente a linha seguinte para imprimir a matriz de adjacencia do grafo
     #g.matriz_adjacencia()
-    
 
+ORIGEM = 0
+DESTINO = 27
+
+dijkstra(g, g.get_vertice(ORIGEM), g.get_vertice(DESTINO))
+print("Menor Distancia entre {0} e {1} = {2}".format(ORIGEM, DESTINO, g.get_vertice(DESTINO).distancia)) # Imprime menor distancia da origem ao destino
