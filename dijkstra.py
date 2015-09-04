@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import sys
+import time
 from math import sqrt
 from re import findall
 
@@ -247,6 +248,7 @@ if __name__ == '__main__':
     SOMA = 0 # Soma do caminho final
     J = 0 # Numero a mais
 
+    startTime = time.clock()
     while(TOTAL_VERT <= N): # Executa algoritmo enquanto nao rodar Dijkstra para todos os vertices
         NVERTICES = 0  # Numero de vertices no caminho 
         TAMANHO = 9999 # Tamanho do caminho 
@@ -297,7 +299,10 @@ if __name__ == '__main__':
     ultimo_caminho = (g.get_vertice(TOTAL_CAM[-1]).get_valor(g.get_vertice(PRIM_ORIGEM)))
     SOMA = SOMA + ultimo_caminho
     TOTAL_CAM.append(PRIM_ORIGEM)
+    
+    endTime = time.clock()
     print("Caminho Total: {0} = {1}".format(TOTAL_CAM, SOMA))
+    print("Tempo de Execucao {0}".format(endTime-startTime))
 
     # Descomente as 3 linhas seguintes para imprimir as conexoes do Grafo
     #conexoes = g.retorna_conexoes() 
